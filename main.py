@@ -1,4 +1,9 @@
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
+from fastapi import FastAPI
+import uvicorn
+
+
+app = FastAPI()
 
 data = {
     "email": "testuser@mail.co",
@@ -24,5 +29,18 @@ class UserWithAgeSchema(UserSchema):
     age: int = Field(ge=0, le=125)
 
 
-print(repr(UserSchema(**data)))
-print(repr(UserWithAgeSchema(**data_with_age)))
+users = []
+
+@app.post("/users")
+def add_user(user: UserSchema):
+    users.append(user)
+    return {"success": True, "msg": "User has been added"}
+
+
+@app.get("/users")
+def get_users() -> list[UserSchema]:
+    return users
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", reload=True)
